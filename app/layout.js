@@ -12,10 +12,22 @@ const geistMono = localFont({
   weight: '100 900',
 });
 
+const BASE_URL = process.env.NEXT_PUBLIC_SITE_URL || 'https://snapclip.app';
+
 export const metadata = {
+  metadataBase: new URL(BASE_URL),
   title: { default: 'SNAP — Universal Clipboard Vault', template: '%s | SNAP' },
   description:
     'Clipboard history that follows you everywhere. Sync across all your devices, search instantly, and never lose a copy again.',
+  openGraph: {
+    type: 'website',
+    siteName: 'SNAP',
+    locale: 'en_US',
+  },
+  twitter: {
+    card: 'summary_large_image',
+    site: '@snapclipapp',
+  },
 };
 
 export default function RootLayout({ children }) {
