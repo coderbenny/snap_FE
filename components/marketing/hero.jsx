@@ -17,13 +17,12 @@ export default function Hero() {
         </div>
 
         <h1 className="text-balance text-4xl font-bold tracking-tight text-foreground sm:text-6xl">
-          Your clipboard,{' '}
-          <span className="text-primary">synced everywhere.</span>
+          Your clipboard, <span className="text-primary">synced everywhere.</span>
         </h1>
 
         <p className="mx-auto mt-6 max-w-2xl text-balance text-lg text-muted-foreground">
-          SNAP remembers everything you copy and keeps it in sync across every device —
-          encrypted end-to-end. Find anything in seconds. Never retype what you already copied.
+          SNAP remembers everything you copy and keeps it in sync across every device - encrypted
+          end-to-end. Find anything in seconds. Never retype what you already copied.
         </p>
 
         <div className="mt-10 flex flex-col items-center justify-center gap-4 sm:flex-row">
@@ -60,17 +59,23 @@ export default function Hero() {
               {[
                 { type: 'text', preview: 'npm install snap-client --save', time: 'just now' },
                 { type: 'url', preview: 'https://github.com/snap/snap-server', time: '2m ago' },
-                { type: 'text', preview: 'Bearer eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXV...', time: '5m ago' },
-                { type: 'text', preview: 'SELECT * FROM clipboard_items WHERE user_id = ?', time: '12m ago' },
-                { type: 'url', preview: 'https://snap.zuri.health/pricing', time: '1h ago' },
+                {
+                  type: 'text',
+                  preview: 'Bearer eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXV...',
+                  time: '5m ago',
+                },
+                {
+                  type: 'text',
+                  preview: 'SELECT * FROM clipboard_items WHERE user_id = ?',
+                  time: '12m ago',
+                },
+                { type: 'url', preview: 'https://tabmemory.smartminds.life', time: '1h ago' },
               ].map((item, i) => (
                 <div
                   key={i}
                   className="flex items-center gap-3 rounded-md px-3 py-2 transition-colors hover:bg-muted"
                 >
-                  <span className="shrink-0 text-lg">
-                    {item.type === 'url' ? '🔗' : '📋'}
-                  </span>
+                  <span className="shrink-0 text-lg">{item.type === 'url' ? '🔗' : '📋'}</span>
                   <span className="min-w-0 flex-1 truncate font-mono text-xs text-foreground">
                     {item.preview}
                   </span>

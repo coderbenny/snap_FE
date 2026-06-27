@@ -5,7 +5,7 @@ const FEATURES = [
     icon: ClipboardList,
     title: 'Unlimited history',
     description:
-      'Every copy you make is saved automatically — text, URLs, code, and more. Go back as far as you need.',
+      'Every copy you make is saved automatically - text, URLs, code and more. Go back as far as you need.',
   },
   {
     icon: RefreshCw,
@@ -17,7 +17,7 @@ const FEATURES = [
     icon: Shield,
     title: 'End-to-end encrypted',
     description:
-      'Your clipboard is encrypted on-device before it ever leaves. We store ciphertext — even we can\'t read your data.',
+      'Your clipboard is encrypted on-device before it ever leaves. We store ciphertext - even we can\'t read your data.',
   },
   {
     icon: Search,
@@ -29,13 +29,13 @@ const FEATURES = [
     icon: Tag,
     title: 'Smart tagging',
     description:
-      'Clipboard items are automatically categorised by type: code, URLs, emails, passwords, and more.',
+      'Clipboard items are automatically categorised by type: code, URLs, emails, passwords and more.',
   },
   {
     icon: Users,
     title: 'Team snippet library',
     description:
-      'Share encrypted snippets with your team. Everyone stays in sync with the same commands, tokens, and templates.',
+      'Share encrypted snippets with your team. Everyone stays in sync with the same commands, tokens and templates.',
   },
 ];
 
@@ -48,7 +48,7 @@ export default function Features() {
             Everything your clipboard should be
           </h2>
           <p className="mt-4 text-muted-foreground">
-            SNAP works silently in the background, capturing everything — so you never have
+            SNAP works silently in the background, capturing everything - so you never have
             to think about it.
           </p>
         </div>

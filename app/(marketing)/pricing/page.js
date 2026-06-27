@@ -15,7 +15,7 @@ export default function PricingPage() {
             Simple, honest pricing
           </h1>
           <p className="mt-4 text-lg text-muted-foreground">
-            Start free — no account required. Upgrade when you need sync or AI. Cancel any time.
+            Start free, Upgrade when you need sync or AI. Cancel any time.
           </p>
         </div>
 
@@ -30,7 +30,7 @@ export default function PricingPage() {
             {[
               {
                 q: 'What counts as a "device"?',
-                a: 'Any desktop or mobile installation of the SNAP app. Your web account at snap.zuri.health is not counted as a device.',
+                a: 'Any desktop or mobile installation of the SNAP app. Your web account at snap.life is not counted as a device.',
               },
               {
                 q: 'Is my clipboard data really private?',
@@ -42,7 +42,7 @@ export default function PricingPage() {
               },
               {
                 q: 'Do you offer refunds?',
-                a: 'Yes — within 14 days of a charge, no questions asked. Email support@snap.zuri.health.',
+                a: 'Yes — within 14 days of a charge, no questions asked. Email support@snap.life.',
               },
               {
                 q: 'How does Team billing work?',
