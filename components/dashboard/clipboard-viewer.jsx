@@ -95,6 +95,10 @@ export default function ClipboardViewer() {
     if (keyRef.current) fetchClips(keyRef.current, null, false);
   }
 
+  // Count clips whose decryption failed — surfaces when the key is wrong or clips
+  // were encrypted by an older app version with incompatible parameters.
+  const decryptFailCount = clips.filter((c) => c.content === null).length;
+
   // Client-side filter
   const filtered = clips.filter((clip) => {
     if (typeFilter !== 'all' && clip.content_type !== typeFilter) return false;
@@ -153,6 +157,16 @@ export default function ClipboardViewer() {
 
   return (
     <div className="space-y-4">
+      {/* Decrypt-failure banner — shown when some clips couldn't be decrypted.
+          Most common cause: clips saved by the mobile app before a key update. */}
+      {decryptFailCount > 0 && (
+        <div className="rounded-lg border border-amber-200 bg-amber-50 px-4 py-3 text-sm text-amber-800 dark:border-amber-800 dark:bg-amber-950/40 dark:text-amber-300">
+          {decryptFailCount === clips.length
+            ? 'None of your clips could be decrypted. Make sure you entered the correct password — sign out and sign back in to re-enter it.'
+            : `${decryptFailCount} clip${decryptFailCount === 1 ? '' : 's'} could not be decrypted. They may have been saved by an older version of the app and cannot be recovered.`}
+        </div>
+      )}
+
       {/* Toolbar */}
       <div className="flex flex-col gap-3 sm:flex-row sm:items-center sm:justify-between">
         {/* Search */}

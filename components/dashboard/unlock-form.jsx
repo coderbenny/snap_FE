@@ -5,7 +5,7 @@ import { Lock, Loader2 } from 'lucide-react';
 import { Button } from '@/components/ui/button';
 import { Input } from '@/components/ui/input';
 import { Label } from '@/components/ui/label';
-import { deriveKey, storeKey } from '@/lib/crypto';
+import { deriveKey, storeKey, decrypt } from '@/lib/crypto';
 
 export default function UnlockForm({ onUnlock }) {
   const [password, setPassword] = useState('');
@@ -19,14 +19,37 @@ export default function UnlockForm({ onUnlock }) {
 
     try {
       const meRes = await fetch('/api/auth/me');
-      if (!meRes.ok) throw new Error('auth');
+      if (!meRes.ok) throw new Error('session_expired');
       const { userId } = await meRes.json();
 
       const key = await deriveKey(password, userId);
+
+      // Verify the derived key against a real clip before accepting it.
+      // This catches wrong passwords immediately rather than silently showing
+      // "[Could not decrypt]" on every clip.
+      // Skip verification when there are no clips yet or sync is not accessible (403).
+      const testRes = await fetch('/api/sync/pull?limit=1');
+      if (testRes.ok) {
+        const { items } = await testRes.json();
+        if (items?.length > 0) {
+          try {
+            await decrypt(key, items[0].ciphertext, items[0].iv);
+          } catch {
+            throw new Error('wrong_password');
+          }
+        }
+      }
+
       await storeKey(key);
       onUnlock(key);
-    } catch {
-      setError('Incorrect password or session expired. Try again.');
+    } catch (err) {
+      if (err.message === 'wrong_password') {
+        setError('Incorrect password. Please check your password and try again.');
+      } else if (err.message === 'session_expired') {
+        setError('Session expired. Please sign in again.');
+      } else {
+        setError('Something went wrong. Please try again.');
+      }
     } finally {
       setLoading(false);
     }
