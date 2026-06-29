@@ -17,24 +17,26 @@ function planHighlight(tier) {
 
 export default function PaystackCheckout({ currentPlan, plans, userEmail }) {
   const [paystackReady, setPaystackReady] = useState(false);
-  const [loading, setLoading] = useState(null);   // tier string while request is in flight
+  const [loading, setLoading] = useState(null);   // tier string while in flight
   const [portalLoading, setPortalLoading] = useState(false);
-  const [newPlan, setNewPlan] = useState(null);   // tier after successful payment
+  const [newPlan, setNewPlan] = useState(null);   // optimistic tier after payment
   const [error, setError] = useState(null);
 
   const activePlan = newPlan ?? currentPlan;
 
-  // Load the Paystack inline script once on mount.
+  // Load Paystack InlineJS v2 once on mount.
+  // v2 exposes PaystackPop as a class — PaystackPop.newTransaction() is the
+  // correct API for access_code-based pre-initialized transactions.
   useEffect(() => {
-    if (typeof window !== 'undefined' && window.PaystackPop) {
+    if (typeof window !== 'undefined' && typeof window.PaystackPop === 'function') {
       setPaystackReady(true);
       return;
     }
     const script = document.createElement('script');
-    script.src = 'https://js.paystack.co/v1/inline.js';
+    script.src = 'https://js.paystack.co/v2/inline.js';
     script.async = true;
     script.onload = () => setPaystackReady(true);
-    script.onerror = () => console.warn('Failed to load Paystack inline JS');
+    script.onerror = () => console.warn('Paystack InlineJS failed to load');
     document.head.appendChild(script);
   }, []);
 
@@ -42,8 +44,10 @@ export default function PaystackCheckout({ currentPlan, plans, userEmail }) {
     setLoading(tier);
     setError(null);
 
+    let authorizationUrl = null;
+
     try {
-      // 1. Ask our backend to initialize a Paystack transaction.
+      // Step 1 — initialize transaction on our backend.
       const initRes = await fetch('/api/billing/subscribe', {
         method: 'POST',
         headers: { 'Content-Type': 'application/json' },
@@ -51,29 +55,35 @@ export default function PaystackCheckout({ currentPlan, plans, userEmail }) {
       });
 
       if (!initRes.ok) {
-        const { error: msg } = await initRes.json();
-        throw new Error(msg || 'Could not initialize payment');
+        const body = await initRes.json().catch(() => ({}));
+        throw new Error(body.error || 'Could not initialize payment. Please try again.');
       }
 
-      const { authorization_url, reference } = await initRes.json();
+      // Backend returns { authorization_url, access_code, reference }
+      const { authorization_url, access_code } = await initRes.json();
+      authorizationUrl = authorization_url;
 
-      // 2. Open Paystack inline popup.
-      //    Falls back to redirect if the popup cannot open.
-      if (paystackReady && window.PaystackPop) {
-        const handler = window.PaystackPop.setup({
+      // Step 2 — open the Paystack inline popup.
+      // accessCode (camelCase) is the v2 API key; it carries all pre-configured
+      // transaction details (plan, amount, email) from the server-side initialize call.
+      if (paystackReady && typeof window.PaystackPop === 'function') {
+        const popup = new window.PaystackPop();
+        popup.newTransaction({
           key: PAYSTACK_PUBLIC_KEY,
-          email: userEmail,
-          ref: reference,
-          onClose: () => setLoading(null),
-          callback: async (response) => {
-            // 3. Verify payment server-side and update UI.
+          accessCode: access_code,
+
+          // Step 3 — verify server-side once Paystack reports success.
+          onSuccess: async (transaction) => {
             try {
-              const verifyRes = await fetch(`/api/billing/verify/${response.reference}`);
+              const verifyRes = await fetch(
+                `/api/billing/verify/${transaction.reference}`
+              );
               if (verifyRes.ok) {
                 const { tier: confirmedTier } = await verifyRes.json();
                 setNewPlan(confirmedTier ?? tier);
               } else {
-                setNewPlan(tier); // webhook likely already handled it
+                // Webhook may have already updated the plan — optimistically set it.
+                setNewPlan(tier);
               }
             } catch {
               setNewPlan(tier);
@@ -81,15 +91,22 @@ export default function PaystackCheckout({ currentPlan, plans, userEmail }) {
               setLoading(null);
             }
           },
+
+          onCancel: () => setLoading(null),
         });
-        handler.openIframe();
       } else {
-        // Paystack script blocked or not loaded — fall back to redirect.
+        // Script blocked or not loaded — redirect to hosted Paystack checkout.
         window.location.href = authorization_url;
       }
     } catch (err) {
-      setError(err.message || 'Something went wrong. Please try again.');
-      setLoading(null);
+      // If we already have the authorization_url, prefer redirect over error banner
+      // so the user can still complete payment even if the popup fails.
+      if (authorizationUrl) {
+        window.location.href = authorizationUrl;
+      } else {
+        setError(err.message || 'Something went wrong. Please try again.');
+        setLoading(null);
+      }
     }
   }
 
@@ -98,7 +115,7 @@ export default function PaystackCheckout({ currentPlan, plans, userEmail }) {
     setError(null);
     try {
       const res = await fetch('/api/billing/portal', { method: 'POST' });
-      if (!res.ok) throw new Error('Could not open billing portal');
+      if (!res.ok) throw new Error('Could not open billing portal. Please try again.');
       const { portal_url } = await res.json();
       window.open(portal_url, '_blank', 'noopener,noreferrer');
     } catch (err) {
@@ -118,7 +135,8 @@ export default function PaystackCheckout({ currentPlan, plans, userEmail }) {
         <div className="flex items-center gap-3 rounded-xl border border-green-200 bg-green-50 p-4 text-green-800 dark:border-green-800 dark:bg-green-950/40 dark:text-green-300">
           <Check className="size-5 shrink-0" />
           <p className="text-sm font-medium">
-            You&apos;re now on the <span className="capitalize">{newPlan.replace('_', ' ')}</span> plan. Welcome aboard!
+            You&apos;re now on the{' '}
+            <span className="capitalize">{newPlan.replace('_', ' ')}</span> plan. Welcome aboard!
           </p>
         </div>
       )}
@@ -145,7 +163,9 @@ export default function PaystackCheckout({ currentPlan, plans, userEmail }) {
                 </span>
               </p>
               <p className="text-xs text-muted-foreground">
-                {isPaid ? 'Renews automatically — managed by Paystack' : 'Local history only · no sync'}
+                {isPaid
+                  ? 'Renews automatically — managed by Paystack'
+                  : 'Local history only · no sync'}
               </p>
             </div>
           </div>

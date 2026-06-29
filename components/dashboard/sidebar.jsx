@@ -14,8 +14,7 @@ import {
   Menu,
 } from 'lucide-react';
 import { cn } from '@/lib/utils';
-import { Button } from '@/components/ui/button';
-import { Sheet, SheetContent, SheetTrigger } from '@/components/ui/sheet';
+import { Sheet, SheetContent } from '@/components/ui/sheet';
 import { clearKey } from '@/lib/crypto';
 
 const NAV_ITEMS = [
@@ -112,17 +111,23 @@ export default function Sidebar({ user }) {
 
       {/* Mobile — fixed top bar + Sheet drawer */}
       <header className="fixed inset-x-0 top-0 z-40 flex h-14 items-center gap-3 border-b border-border bg-card px-4 lg:hidden">
+        {/* Plain button — avoids button-in-button hydration error caused by
+            base-ui's SheetTrigger rendering its own <button> around <Button>. */}
+        <button
+          type="button"
+          onClick={() => setOpen(true)}
+          aria-label="Open navigation"
+          className="-ml-1 inline-flex size-9 items-center justify-center rounded-md text-muted-foreground transition-colors hover:bg-muted hover:text-foreground"
+        >
+          <Menu className="size-5" aria-hidden="true" />
+        </button>
+
         <Sheet open={open} onOpenChange={setOpen}>
-          <SheetTrigger asChild>
-            <Button variant="ghost" size="icon" className="-ml-1">
-              <Menu className="size-5" />
-              <span className="sr-only">Open navigation</span>
-            </Button>
-          </SheetTrigger>
           <SheetContent side="left" className="w-56 p-0">
             <SidebarBody user={user} onNavigate={() => setOpen(false)} />
           </SheetContent>
         </Sheet>
+
         <Link href="/dashboard" className="flex items-center gap-2 font-bold text-foreground">
           <Clipboard className="size-5 text-primary" />
           SNAP
