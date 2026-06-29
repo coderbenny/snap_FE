@@ -11,7 +11,7 @@ const FEATURES = [
     icon: RefreshCw,
     title: 'Cross-device sync',
     description:
-      'Copy on your Mac, paste on your PC or phone. SNAP syncs in real time across all your devices.',
+      'Copy on your Mac, paste on your PC or phone. Snapit syncs in real time across all your devices.',
   },
   {
     icon: Shield,
@@ -48,7 +48,7 @@ export default function Features() {
             Everything your clipboard should be
           </h2>
           <p className="mt-4 text-muted-foreground">
-            SNAP works silently in the background, capturing everything - so you never have
+            Snapit works silently in the background, capturing everything - so you never have
             to think about it.
           </p>
         </div>

@@ -3,8 +3,8 @@ import { Button } from '@/components/ui/button';
 import { Badge } from '@/components/ui/badge';
 
 export const metadata = {
-  title: 'Download SNAP',
-  description: 'Download SNAP for macOS, Windows, or Android. Free forever on a single device.',
+  title: 'Download Snapit',
+  description: 'Download Snapit for macOS, Windows, or Android. Free forever on a single device.',
 };
 
 const PLATFORMS = [
@@ -13,30 +13,30 @@ const PLATFORMS = [
     icon: Apple,
     description: 'macOS 13 Ventura or later. Apple Silicon + Intel.',
     badge: 'Universal',
-    file: 'snap-macos-universal.dmg',
+    file: 'snapit-macos-universal.dmg',
     size: '~24 MB',
     checksum: 'sha256: a3f8c1d2e4b5... (full checksum in release notes)',
-    href: 'https://github.com/snap-app/releases/latest/download/snap-macos-universal.dmg',
+    href: 'https://github.com/snapit-app/releases/latest/download/snapit-macos-universal.dmg',
   },
   {
     name: 'Windows',
     icon: Monitor,
     description: 'Windows 10 (64-bit) or later.',
     badge: 'x64',
-    file: 'snap-windows-setup.exe',
+    file: 'snapit-windows-setup.exe',
     size: '~31 MB',
     checksum: 'sha256: b7e2a9f3c6d1... (full checksum in release notes)',
-    href: 'https://github.com/snap-app/releases/latest/download/snap-windows-setup.exe',
+    href: 'https://github.com/snapit-app/releases/latest/download/snapit-windows-setup.exe',
   },
   {
     name: 'Android',
     icon: Smartphone,
     description: 'Android 10 or later. ARMv8 + x86-64.',
     badge: 'Beta',
-    file: 'snap-android.apk',
+    file: 'snapit-android.apk',
     size: '~18 MB',
     checksum: 'sha256: c9d4b8e7a2f5... (full checksum in release notes)',
-    href: 'https://github.com/snap-app/releases/latest/download/snap-android.apk',
+    href: 'https://github.com/snapit-app/releases/latest/download/snapit-android.apk',
   },
 ];
 
@@ -46,7 +46,7 @@ export default function DownloadPage() {
       <div className="mx-auto max-w-4xl px-4 sm:px-6">
         <div className="text-center">
           <h1 className="text-4xl font-bold tracking-tight text-foreground sm:text-5xl">
-            Download SNAP
+            Download Snapit
           </h1>
           <p className="mt-4 text-lg text-muted-foreground">
             Free forever on a single device. No account required to get started.
@@ -92,7 +92,7 @@ export default function DownloadPage() {
           <p>
             All releases are signed and published on{' '}
             <a
-              href="https://github.com/snap-app/releases"
+              href="https://github.com/snapit-app/releases"
               target="_blank"
               rel="noopener noreferrer"
               className="underline hover:text-foreground"

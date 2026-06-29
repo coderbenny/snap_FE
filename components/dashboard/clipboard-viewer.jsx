@@ -223,7 +223,7 @@ export default function ClipboardViewer() {
           <ClipboardList className="size-8 text-muted-foreground" />
           <p className="mt-3 text-sm text-muted-foreground">
             {clips.length === 0
-              ? 'No clips synced yet. Copy something on a device with SNAP installed.'
+              ? 'No clips synced yet. Copy something on a device with Snapit installed.'
               : 'No clips match your filter.'}
           </p>
         </div>

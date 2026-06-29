@@ -8,7 +8,7 @@ export default function DevicesPage() {
       <div>
         <h1 className="text-2xl font-bold tracking-tight text-foreground">Devices</h1>
         <p className="mt-1 text-sm text-muted-foreground">
-          Manage the devices connected to your SNAP account.
+          Manage the devices connected to your Snapit account.
         </p>
       </div>
       <DevicesPanel />

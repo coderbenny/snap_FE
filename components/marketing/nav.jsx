@@ -21,7 +21,7 @@ export default function Nav() {
         {/* Logo */}
         <Link href="/" className="flex items-center gap-2 font-bold text-foreground">
           <Clipboard className="size-5 text-primary" />
-          SNAP
+          Snapit
         </Link>
 
         {/* Desktop nav */}

@@ -3,7 +3,7 @@ import PricingTable from '@/components/marketing/pricing-table';
 export const metadata = {
   title: 'Pricing',
   description:
-    'SNAP is free on a single device. Upgrade to Pro for cross-device sync, or Team for a shared snippet library.',
+    'Snapit is free on a single device. Upgrade to Pro for cross-device sync, or Team for a shared snippet library.',
 };
 
 export default function PricingPage() {
@@ -30,7 +30,7 @@ export default function PricingPage() {
             {[
               {
                 q: 'What counts as a "device"?',
-                a: 'Any desktop or mobile installation of the SNAP app. Your web account at snap.life is not counted as a device.',
+                a: 'Any desktop or mobile installation of the Snapit app. Your web account at snapit.ink is not counted as a device.',
               },
               {
                 q: 'Is my clipboard data really private?',
@@ -42,7 +42,7 @@ export default function PricingPage() {
               },
               {
                 q: 'Do you offer refunds?',
-                a: 'Yes — within 14 days of a charge, no questions asked. Email support@snap.life.',
+                a: 'Yes — within 14 days of a charge, no questions asked. Email support@snapit.ink.',
               },
               {
                 q: 'How does Team billing work?',

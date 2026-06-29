@@ -21,7 +21,7 @@ export default function Hero() {
         </h1>
 
         <p className="mx-auto mt-6 max-w-2xl text-balance text-lg text-muted-foreground">
-          SNAP remembers everything you copy and keeps it in sync across every device - encrypted
+          Snapit remembers everything you copy and keeps it in sync across every device - encrypted
           end-to-end. Find anything in seconds. Never retype what you already copied.
         </p>
 

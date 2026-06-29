@@ -63,7 +63,7 @@ function SidebarBody({ user, onNavigate }) {
           className="flex items-center gap-2 font-bold text-foreground"
         >
           <Clipboard className="size-5 text-primary" />
-          SNAP
+          Snapit
         </Link>
       </div>
 
@@ -130,7 +130,7 @@ export default function Sidebar({ user }) {
 
         <Link href="/dashboard" className="flex items-center gap-2 font-bold text-foreground">
           <Clipboard className="size-5 text-primary" />
-          SNAP
+          Snapit
         </Link>
       </header>
     </>

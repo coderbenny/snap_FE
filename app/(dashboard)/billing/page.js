@@ -5,7 +5,7 @@ import { authedApi } from '@/lib/api';
 import { sessionOptions } from '@/lib/session';
 import PaystackCheckout from './PaystackCheckout';
 
-export const metadata = { title: 'Billing — SNAP' };
+export const metadata = { title: 'Billing — Snapit' };
 
 async function getData(accessToken) {
   const api = authedApi(accessToken);

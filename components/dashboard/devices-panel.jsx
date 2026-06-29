@@ -152,7 +152,7 @@ export default function DevicesPanel() {
         </div>
         <p className="mt-4 text-sm font-medium text-foreground">No devices connected</p>
         <p className="mt-1 max-w-xs text-sm text-muted-foreground">
-          Install SNAP on a device and sign in with this account to see it here.
+          Install Snapit on a device and sign in with this account to see it here.
         </p>
       </div>
     );

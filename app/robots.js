@@ -1,4 +1,4 @@
-const BASE_URL = process.env.NEXT_PUBLIC_SITE_URL || 'https://snapclip.app';
+const BASE_URL = process.env.NEXT_PUBLIC_SITE_URL || 'https://snapit.ink';
 
 export default function robots() {
   return {
