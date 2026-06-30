@@ -19,7 +19,7 @@ const PLATFORMS = [
     badge: 'Universal',
     file: 'snapit-macos-universal.dmg',
     size: '~24 MB',
-    href: `${CDN}/snapit-macos-universal.dmg`,
+    href: `${CDN}/Snapit-1.0.0.dmg`,
   },
   {
     name: 'Windows',
@@ -28,7 +28,7 @@ const PLATFORMS = [
     badge: 'x64',
     file: 'snapit-windows-setup.exe',
     size: '~31 MB',
-    href: `${CDN}/snapit-windows-setup.exe`,
+    href: `${CDN}/Snapit-1.0.0.exe`,
   },
   {
     name: 'Android',
@@ -37,7 +37,7 @@ const PLATFORMS = [
     badge: 'Beta',
     file: 'snapit-android.apk',
     size: '~18 MB',
-    href: `${CDN}/snapit-android.apk`,
+    href: `${CDN}/Snapit-1.0.0.apk`,
   },
 ];
 
