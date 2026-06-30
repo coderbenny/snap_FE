@@ -7,6 +7,10 @@ export const metadata = {
   description: 'Download Snapit for macOS, Windows, or Android. Free forever on a single device.',
 };
 
+// Set NEXT_PUBLIC_CDN_URL in Vercel to your Cloudflare R2 public bucket URL,
+// e.g. https://cdn.snapit.ink  (no trailing slash).
+const CDN = process.env.NEXT_PUBLIC_CDN_URL || 'https://cdn.snapit.ink';
+
 const PLATFORMS = [
   {
     name: 'macOS',
@@ -15,8 +19,7 @@ const PLATFORMS = [
     badge: 'Universal',
     file: 'snapit-macos-universal.dmg',
     size: '~24 MB',
-    checksum: 'sha256: a3f8c1d2e4b5... (full checksum in release notes)',
-    href: 'https://github.com/snapit-app/releases/latest/download/snapit-macos-universal.dmg',
+    href: `${CDN}/snapit-macos-universal.dmg`,
   },
   {
     name: 'Windows',
@@ -25,8 +28,7 @@ const PLATFORMS = [
     badge: 'x64',
     file: 'snapit-windows-setup.exe',
     size: '~31 MB',
-    checksum: 'sha256: b7e2a9f3c6d1... (full checksum in release notes)',
-    href: 'https://github.com/snapit-app/releases/latest/download/snapit-windows-setup.exe',
+    href: `${CDN}/snapit-windows-setup.exe`,
   },
   {
     name: 'Android',
@@ -35,8 +37,7 @@ const PLATFORMS = [
     badge: 'Beta',
     file: 'snapit-android.apk',
     size: '~18 MB',
-    checksum: 'sha256: c9d4b8e7a2f5... (full checksum in release notes)',
-    href: 'https://github.com/snapit-app/releases/latest/download/snapit-android.apk',
+    href: `${CDN}/snapit-android.apk`,
   },
 ];
 
@@ -54,7 +55,7 @@ export default function DownloadPage() {
         </div>
 
         <div className="mt-16 grid grid-cols-1 gap-6 sm:grid-cols-3">
-          {PLATFORMS.map(({ name, icon: Icon, description, badge, file, size, checksum, href }) => (
+          {PLATFORMS.map(({ name, icon: Icon, description, badge, file, size, href }) => (
             <div key={name} className="flex flex-col rounded-xl border border-border bg-card p-6">
               <div className="mb-4 flex items-center justify-between">
                 <div className="flex size-10 items-center justify-center rounded-lg bg-muted">
@@ -79,10 +80,6 @@ export default function DownloadPage() {
                 <p className="text-xs text-muted-foreground">
                   <span className="font-medium">Size:</span> {size}
                 </p>
-                <p className="truncate text-xs text-muted-foreground">
-                  <span className="font-medium">Checksum:</span>{' '}
-                  <code className="font-mono">{checksum}</code>
-                </p>
               </div>
             </div>
           ))}
@@ -90,16 +87,8 @@ export default function DownloadPage() {
 
         <div className="mt-12 rounded-xl border border-border bg-muted/50 p-6 text-center text-sm text-muted-foreground">
           <p>
-            All releases are signed and published on{' '}
-            <a
-              href="https://github.com/snapit-app/releases"
-              target="_blank"
-              rel="noopener noreferrer"
-              className="underline hover:text-foreground"
-            >
-              GitHub Releases
-            </a>
-            . Verify checksums before installing.
+            All releases are distributed via Cloudflare&apos;s global CDN for fast, reliable
+            downloads from anywhere in the world.
           </p>
         </div>
       </div>

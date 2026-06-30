@@ -1,21 +1,17 @@
 'use client';
 
 import { useState } from 'react';
-import { useRouter, useSearchParams } from 'next/navigation';
 import Link from 'next/link';
-import { Clipboard, Loader2 } from 'lucide-react';
+import { Clipboard, ArrowLeft, Loader2, CheckCircle2 } from 'lucide-react';
 import { Button } from '@/components/ui/button';
 import { Input } from '@/components/ui/input';
 import { Label } from '@/components/ui/label';
-import { deriveKey, storeKey } from '@/lib/crypto';
 
-export default function LoginForm() {
-  const router = useRouter();
-  const searchParams = useSearchParams();
+export default function ForgotPasswordForm() {
   const [email, setEmail] = useState('');
-  const [password, setPassword] = useState('');
-  const [error, setError] = useState('');
   const [loading, setLoading] = useState(false);
+  const [submitted, setSubmitted] = useState(false);
+  const [error, setError] = useState('');
 
   async function handleSubmit(e) {
     e.preventDefault();
@@ -23,29 +19,48 @@ export default function LoginForm() {
     setLoading(true);
 
     try {
-      const res = await fetch('/api/auth/login', {
+      const res = await fetch('/api/auth/forgot-password', {
         method: 'POST',
         headers: { 'Content-Type': 'application/json' },
-        body: JSON.stringify({ email, password }),
+        body: JSON.stringify({ email }),
       });
 
-      const data = await res.json();
-
       if (!res.ok) {
-        setError(data.error || 'Invalid email or password');
+        const data = await res.json();
+        setError(data.error || 'Something went wrong. Please try again.');
         return;
       }
 
-      // Derive AES-256-GCM key from password + userId (PBKDF2, ~1s)
-      const key = await deriveKey(password, data.userId);
-      await storeKey(key);
-
-      router.push(searchParams.get('next') || '/dashboard');
+      setSubmitted(true);
     } catch {
       setError('Something went wrong. Please try again.');
     } finally {
       setLoading(false);
     }
+  }
+
+  if (submitted) {
+    return (
+      <div className="w-full max-w-sm text-center">
+        <div className="mb-6 flex justify-center">
+          <div className="flex size-12 items-center justify-center rounded-xl bg-primary/10">
+            <CheckCircle2 className="size-6 text-primary" />
+          </div>
+        </div>
+        <h1 className="text-2xl font-bold tracking-tight text-foreground">Check your inbox</h1>
+        <p className="mt-2 text-sm text-muted-foreground">
+          If <strong>{email}</strong> is registered, you&apos;ll receive a reset link shortly.
+          It expires in 1 hour.
+        </p>
+        <Link
+          href="/login"
+          className="mt-6 inline-flex items-center gap-1.5 text-sm font-medium text-foreground underline-offset-4 hover:underline"
+        >
+          <ArrowLeft className="size-4" />
+          Back to sign in
+        </Link>
+      </div>
+    );
   }
 
   return (
@@ -55,8 +70,10 @@ export default function LoginForm() {
           <Clipboard className="size-6 text-primary" />
         </div>
         <div className="text-center">
-          <h1 className="text-2xl font-bold tracking-tight text-foreground">Welcome back</h1>
-          <p className="mt-1 text-sm text-muted-foreground">Sign in to your clipboard vault</p>
+          <h1 className="text-2xl font-bold tracking-tight text-foreground">Forgot password?</h1>
+          <p className="mt-1 text-sm text-muted-foreground">
+            Enter your email and we&apos;ll send you a reset link
+          </p>
         </div>
       </div>
 
@@ -80,40 +97,19 @@ export default function LoginForm() {
           />
         </div>
 
-        <div className="space-y-1.5">
-          <div className="flex items-center justify-between">
-            <Label htmlFor="password">Password</Label>
-            <Link
-              href="/forgot-password"
-              className="text-xs text-muted-foreground underline-offset-4 hover:underline"
-            >
-              Forgot password?
-            </Link>
-          </div>
-          <Input
-            id="password"
-            type="password"
-            placeholder="••••••••"
-            autoComplete="current-password"
-            required
-            value={password}
-            onChange={(e) => setPassword(e.target.value)}
-          />
-        </div>
-
         <Button type="submit" className="w-full" disabled={loading}>
           {loading && <Loader2 className="mr-2 size-4 animate-spin" />}
-          {loading ? 'Signing in…' : 'Sign in'}
+          {loading ? 'Sending…' : 'Send reset link'}
         </Button>
       </form>
 
       <p className="mt-6 text-center text-sm text-muted-foreground">
-        Don&apos;t have an account?{' '}
+        Remember your password?{' '}
         <Link
-          href="/register"
+          href="/login"
           className="font-medium text-foreground underline-offset-4 hover:underline"
         >
-          Create one free
+          Sign in
         </Link>
       </p>
     </div>
