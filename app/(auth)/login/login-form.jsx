@@ -15,11 +15,13 @@ export default function LoginForm() {
   const [email, setEmail] = useState('');
   const [password, setPassword] = useState('');
   const [error, setError] = useState('');
+  const [unverified, setUnverified] = useState(false);
   const [loading, setLoading] = useState(false);
 
   async function handleSubmit(e) {
     e.preventDefault();
     setError('');
+    setUnverified(false);
     setLoading(true);
 
     try {
@@ -32,7 +34,11 @@ export default function LoginForm() {
       const data = await res.json();
 
       if (!res.ok) {
-        setError(data.error || 'Invalid email or password');
+        if (data.error?.includes('verify your email')) {
+          setUnverified(true);
+        } else {
+          setError(data.error || 'Invalid email or password');
+        }
         return;
       }
 
@@ -64,6 +70,28 @@ export default function LoginForm() {
         {error && (
           <div className="rounded-md bg-destructive/10 px-3 py-2 text-sm text-destructive">
             {error}
+          </div>
+        )}
+
+        {unverified && (
+          <div className="rounded-md border border-amber-200 bg-amber-50 px-3 py-2.5 text-sm text-amber-800">
+            <p className="font-medium">Check your inbox</p>
+            <p className="mt-0.5 text-amber-700">
+              You need to verify your email before signing in. Can&apos;t find it?{' '}
+              <button
+                type="button"
+                className="font-medium underline underline-offset-2 hover:text-amber-900"
+                onClick={async () => {
+                  await fetch('/api/auth/resend-verification', {
+                    method: 'POST',
+                    headers: { 'Content-Type': 'application/json' },
+                    body: JSON.stringify({ email }),
+                  });
+                }}
+              >
+                Resend verification email
+              </button>
+            </p>
           </div>
         )}
 
