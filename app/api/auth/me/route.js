@@ -14,5 +14,6 @@ export async function GET() {
   return NextResponse.json({
     userId: session.userId,
     email: session.userEmail,
+    isAdmin: session.isAdmin === true,
   });
 }

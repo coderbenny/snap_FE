@@ -27,6 +27,7 @@ export async function POST(req) {
   session.refreshToken = refresh_token;
   session.userId = payload.sub;
   session.userEmail = email.toLowerCase();
+  session.isAdmin = payload.is_admin === true;
   await session.save();
 
   return NextResponse.json({ ok: true, userId: payload.sub });
