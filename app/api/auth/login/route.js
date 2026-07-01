@@ -30,5 +30,5 @@ export async function POST(req) {
   session.isAdmin = payload.is_admin === true;
   await session.save();
 
-  return NextResponse.json({ ok: true, userId: payload.sub });
+  return NextResponse.json({ ok: true, userId: payload.sub, isAdmin: session.isAdmin });
 }

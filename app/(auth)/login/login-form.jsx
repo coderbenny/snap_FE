@@ -47,7 +47,8 @@ export default function LoginForm() {
       const key = await deriveKey(password, data.userId);
       await storeKey(key);
 
-      router.push(searchParams.get('next') || '/dashboard');
+      const next = searchParams.get('next');
+      router.push(next || (data.isAdmin ? '/admin' : '/dashboard'));
     } catch {
       setError('Something went wrong. Please try again.');
     } finally {
