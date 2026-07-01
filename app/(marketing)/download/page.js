@@ -37,7 +37,7 @@ const PLATFORMS = [
     badge: 'Beta',
     file: 'snapit-android.apk',
     size: '~18 MB',
-    href: `${CDN}/Snapit-1.0.0.apk`,
+    href: `${CDN}/snapit-android.apk`,
   },
 ];
 
