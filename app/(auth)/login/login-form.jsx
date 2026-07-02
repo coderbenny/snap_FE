@@ -1,7 +1,7 @@
 'use client';
 
 import { useState } from 'react';
-import { useRouter, useSearchParams } from 'next/navigation';
+import { useSearchParams } from 'next/navigation';
 import Link from 'next/link';
 import { Clipboard, Eye, EyeOff, Loader2 } from 'lucide-react';
 import { Button } from '@/components/ui/button';
@@ -10,7 +10,6 @@ import { Label } from '@/components/ui/label';
 import { deriveKey, storeKey } from '@/lib/crypto';
 
 export default function LoginForm() {
-  const router = useRouter();
   const searchParams = useSearchParams();
   const [email, setEmail] = useState('');
   const [password, setPassword] = useState('');
@@ -48,7 +47,7 @@ export default function LoginForm() {
       await storeKey(key);
 
       const next = searchParams.get('next');
-      router.push(next || (data.isAdmin ? '/admin' : '/dashboard'));
+      window.location.href = next || (data.isAdmin ? '/admin' : '/dashboard');
     } catch {
       setError('Something went wrong. Please try again.');
     } finally {
