@@ -25,7 +25,12 @@ export default function AdminSubscriptions() {
 
   function openEdit(sub) {
     setEditing(sub);
-    setForm({ status: sub.status, expires_at: sub.expires_at?.slice(0, 16), tier: sub.tier });
+    setForm({
+      status: sub.status,
+      expires_at: sub.expires_at?.slice(0, 16),
+      tier: sub.tier,
+      file_transfer_addon: sub.file_transfer_addon ?? false,
+    });
   }
 
   async function save() {
@@ -69,6 +74,7 @@ export default function AdminSubscriptions() {
                 <th>User</th>
                 <th>Tier</th>
                 <th>Status</th>
+                <th>File Xfer</th>
                 <th>Expires</th>
                 <th>Paystack sub</th>
                 <th>Actions</th>
@@ -80,6 +86,11 @@ export default function AdminSubscriptions() {
                   <td style={{ color: '#9ca3af' }}>{s.user_email || s.user_id}</td>
                   <td><PlanBadge tier={s.tier} /></td>
                   <td><StatusBadge status={s.status} /></td>
+                  <td>
+                    {s.file_transfer_addon
+                      ? <span className="badge badge-green">on</span>
+                      : <span className="badge badge-gray">off</span>}
+                  </td>
                   <td style={{ color: '#6b7280', fontSize: 12 }}>{fmtDate(s.expires_at)}</td>
                   <td style={{ color: '#4b5563', fontSize: 11 }}>{s.paystack_sub_code || '—'}</td>
                   <td>
@@ -146,6 +157,15 @@ export default function AdminSubscriptions() {
                   type="datetime-local"
                   value={form.expires_at || ''}
                   onChange={(e) => setForm({ ...form, expires_at: e.target.value })}
+                />
+              </div>
+              <div style={{ display: 'flex', alignItems: 'center', gap: 10 }}>
+                <label style={{ margin: 0 }}>File Transfer Addon</label>
+                <input
+                  type="checkbox"
+                  checked={form.file_transfer_addon ?? false}
+                  onChange={(e) => setForm({ ...form, file_transfer_addon: e.target.checked })}
+                  style={{ width: 16, height: 16, cursor: 'pointer' }}
                 />
               </div>
             </div>

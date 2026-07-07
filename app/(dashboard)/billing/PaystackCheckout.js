@@ -1,7 +1,7 @@
 'use client';
 
 import { useState, useEffect } from 'react';
-import { Check, CreditCard, ExternalLink, Loader2, Sparkles } from 'lucide-react';
+import { Check, CreditCard, ExternalLink, Loader2, Share2, Sparkles } from 'lucide-react';
 
 const PAYSTACK_PUBLIC_KEY = process.env.NEXT_PUBLIC_PAYSTACK_PUBLIC_KEY;
 
@@ -15,11 +15,13 @@ function planHighlight(tier) {
   return tier === 'pro';
 }
 
-export default function PaystackCheckout({ currentPlan, plans, userEmail }) {
+export default function PaystackCheckout({ currentPlan, plans, userEmail, fileTransferAddon, fileTransferAddonInfo }) {
   const [paystackReady, setPaystackReady] = useState(false);
   const [loading, setLoading] = useState(null);   // tier string while in flight
+  const [addonLoading, setAddonLoading] = useState(false);
   const [portalLoading, setPortalLoading] = useState(false);
   const [newPlan, setNewPlan] = useState(null);   // optimistic tier after payment
+  const [addonActive, setAddonActive] = useState(fileTransferAddon);
   const [error, setError] = useState(null);
 
   const activePlan = newPlan ?? currentPlan;
@@ -106,6 +108,51 @@ export default function PaystackCheckout({ currentPlan, plans, userEmail }) {
       } else {
         setError(err.message || 'Something went wrong. Please try again.');
         setLoading(null);
+      }
+    }
+  }
+
+  async function handleAddonPurchase() {
+    setAddonLoading(true);
+    setError(null);
+
+    let authorizationUrl = null;
+    try {
+      const initRes = await fetch('/api/billing/addon/file-transfer', { method: 'POST' });
+      if (!initRes.ok) {
+        const body = await initRes.json().catch(() => ({}));
+        throw new Error(body.error || 'Could not initialize payment. Please try again.');
+      }
+
+      const { authorization_url, access_code } = await initRes.json();
+      authorizationUrl = authorization_url;
+
+      if (paystackReady && typeof window.PaystackPop === 'function') {
+        const popup = new window.PaystackPop();
+        popup.newTransaction({
+          key: PAYSTACK_PUBLIC_KEY,
+          accessCode: access_code,
+          onSuccess: async (transaction) => {
+            try {
+              const verifyRes = await fetch(
+                `/api/billing/addon/verify/${transaction.reference}`
+              );
+              if (verifyRes.ok) setAddonActive(true);
+            } finally {
+              setAddonLoading(false);
+            }
+          },
+          onCancel: () => setAddonLoading(false),
+        });
+      } else {
+        window.location.href = authorization_url;
+      }
+    } catch (err) {
+      if (authorizationUrl) {
+        window.location.href = authorizationUrl;
+      } else {
+        setError(err.message || 'Something went wrong. Please try again.');
+        setAddonLoading(false);
       }
     }
   }
@@ -266,6 +313,56 @@ export default function PaystackCheckout({ currentPlan, plans, userEmail }) {
           Payments processed securely by Paystack. Cancel anytime from &quot;Manage billing&quot; above.
         </p>
       </div>
+
+      {/* Add-ons — only shown to paid, non-team users when the backend returns addon info */}
+      {isPaid && activePlan !== 'team' && fileTransferAddonInfo && (
+        <div>
+          <h2 className="mb-4 text-base font-semibold text-foreground">Add-ons</h2>
+          <div className="rounded-xl border border-border bg-card p-5">
+            <div className="flex items-start justify-between gap-4">
+              <div className="flex items-start gap-3">
+                <div className="flex size-10 shrink-0 items-center justify-center rounded-lg bg-muted">
+                  <Share2 className="size-5 text-muted-foreground" />
+                </div>
+                <div>
+                  <p className="text-sm font-medium text-foreground">
+                    {fileTransferAddonInfo.name}
+                  </p>
+                  <p className="mt-0.5 text-xs text-muted-foreground">
+                    {fileTransferAddonInfo.description}
+                  </p>
+                  <p className="mt-1.5 text-sm font-semibold text-foreground">
+                    ${(fileTransferAddonInfo.price_usd_cents / 100).toFixed(2)}{' '}
+                    <span className="text-xs font-normal text-muted-foreground">
+                      {fileTransferAddonInfo.type === 'one_time' ? 'one-time' : '/mo'}
+                    </span>
+                  </p>
+                </div>
+              </div>
+
+              <div className="shrink-0">
+                {addonActive ? (
+                  <span className="inline-flex items-center gap-1.5 rounded-full bg-green-100 px-3 py-1 text-xs font-medium text-green-800 dark:bg-green-900/30 dark:text-green-300">
+                    <Check className="size-3" /> Active
+                  </span>
+                ) : (
+                  <button
+                    onClick={handleAddonPurchase}
+                    disabled={addonLoading || !paystackReady}
+                    className="flex items-center gap-2 rounded-lg bg-primary px-4 py-2 text-sm font-medium text-primary-foreground transition hover:bg-primary/90 disabled:opacity-60"
+                  >
+                    {addonLoading ? (
+                      <><Loader2 className="size-4 animate-spin" /> Opening payment…</>
+                    ) : (
+                      `Add for $${(fileTransferAddonInfo.price_usd_cents / 100).toFixed(2)}`
+                    )}
+                  </button>
+                )}
+              </div>
+            </div>
+          </div>
+        </div>
+      )}
     </div>
   );
 }

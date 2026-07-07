@@ -14,16 +14,22 @@ async function getData(accessToken) {
     api.get('/billing/plans').catch(() => null),
   ]);
 
+  const rawAddons = plansRes?.data?.addons ?? [];
+  const ftAddon = rawAddons.find((a) => a.id === 'file_transfer') ?? null;
+
   return {
     currentPlan: meRes?.data?.plan ?? 'free',
     userEmail: meRes?.data?.email ?? '',
+    fileTransferAddon: meRes?.data?.file_transfer_addon ?? false,
     plans: plansRes?.data?.plans ?? [],
+    fileTransferAddonInfo: ftAddon,   // { id, name, description, type, price_usd_cents }
   };
 }
 
 export default async function BillingPage() {
   const session = await getIronSession(cookies(), sessionOptions);
-  const { currentPlan, userEmail, plans } = await getData(session.accessToken);
+  const { currentPlan, userEmail, fileTransferAddon, plans, fileTransferAddonInfo } =
+    await getData(session.accessToken);
 
   return (
     <div className="space-y-6">
@@ -38,6 +44,8 @@ export default async function BillingPage() {
         currentPlan={currentPlan}
         plans={plans}
         userEmail={userEmail}
+        fileTransferAddon={fileTransferAddon}
+        fileTransferAddonInfo={fileTransferAddonInfo}
       />
     </div>
   );
