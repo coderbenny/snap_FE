@@ -9,10 +9,10 @@ export default async function DashboardLayout({ children }) {
   const user = { email: session.userEmail || '' };
 
   return (
-    <div className="flex min-h-screen bg-background">
+    <div className="flex h-screen overflow-hidden bg-background">
       <Sidebar user={user} />
       {/* pt-14 on mobile offsets the fixed top bar; removed at lg breakpoint */}
-      <div className="flex min-w-0 flex-1 flex-col pt-14 lg:pt-0">
+      <div className="flex min-w-0 flex-1 flex-col overflow-y-auto pt-14 lg:pt-0">
         <TransferDropZone>
           <main className="flex-1 p-6 lg:p-8">{children}</main>
         </TransferDropZone>

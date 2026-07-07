@@ -1,7 +1,7 @@
 'use client';
 
 import { useState, useEffect, useRef, useCallback } from 'react';
-import { Search, RefreshCw, Loader2, ClipboardList, Zap } from 'lucide-react';
+import { Search, RefreshCw, Loader2, ClipboardList, Zap, ChevronLeft, ChevronRight } from 'lucide-react';
 import Link from 'next/link';
 import { loadKey } from '@/lib/crypto';
 import { decrypt } from '@/lib/crypto';
@@ -10,6 +10,8 @@ import { Input } from '@/components/ui/input';
 import UnlockForm from './unlock-form';
 import ClipCard from './clip-card';
 import { cn } from '@/lib/utils';
+
+const PAGE_SIZE = 20;
 
 const TYPE_FILTERS = [
   { value: 'all', label: 'All' },
@@ -42,6 +44,7 @@ export default function ClipboardViewer() {
   const [hasMore, setHasMore] = useState(false);
   const [nextSince, setNextSince] = useState(null);
   const [loadingMore, setLoadingMore] = useState(false);
+  const [page, setPage] = useState(0);
   const keyRef = useRef(null);
 
   const fetchClips = useCallback(async (key, since, append = false) => {
@@ -64,6 +67,7 @@ export default function ClipboardViewer() {
       setClips((prev) => (append ? [...prev, ...decrypted] : decrypted));
       setHasMore(data.has_more);
       setNextSince(data.next_since ?? null);
+      if (!append) setPage(0);
       setViewState('ready');
     } catch {
       setViewState('error');
@@ -82,6 +86,9 @@ export default function ClipboardViewer() {
     init();
   }, [fetchClips]);
 
+  // Reset to first page whenever the filter changes.
+  useEffect(() => { setPage(0); }, [search, typeFilter]);
+
   function handleUnlock(key) {
     keyRef.current = key;
     fetchClips(key, null, false);
@@ -95,8 +102,6 @@ export default function ClipboardViewer() {
     if (keyRef.current) fetchClips(keyRef.current, null, false);
   }
 
-  // Count clips whose decryption failed — surfaces when the key is wrong or clips
-  // were encrypted by an older app version with incompatible parameters.
   const decryptFailCount = clips.filter((c) => c.content === null).length;
 
   // Client-side filter
@@ -108,6 +113,12 @@ export default function ClipboardViewer() {
     const matchTags = clip.tags?.some((t) => t.toLowerCase().includes(q));
     return matchContent || matchTags;
   });
+
+  const pageCount = Math.max(1, Math.ceil(filtered.length / PAGE_SIZE));
+  const safePage = Math.min(page, pageCount - 1);
+  const paginated = filtered.slice(safePage * PAGE_SIZE, (safePage + 1) * PAGE_SIZE);
+  const isLastPage = safePage >= pageCount - 1;
+  const canLoadMore = isLastPage && hasMore && !search && typeFilter === 'all';
 
   // ── Render states ──────────────────────────────────────────────────────────
 
@@ -157,8 +168,6 @@ export default function ClipboardViewer() {
 
   return (
     <div className="space-y-4">
-      {/* Decrypt-failure banner — shown when some clips couldn't be decrypted.
-          Most common cause: clips saved by the mobile app before a key update. */}
       {decryptFailCount > 0 && (
         <div className="rounded-lg border border-amber-200 bg-amber-50 px-4 py-3 text-sm text-amber-800 dark:border-amber-800 dark:bg-amber-950/40 dark:text-amber-300">
           {decryptFailCount === clips.length
@@ -169,7 +178,6 @@ export default function ClipboardViewer() {
 
       {/* Toolbar */}
       <div className="flex flex-col gap-3 sm:flex-row sm:items-center sm:justify-between">
-        {/* Search */}
         <div className="relative max-w-xs flex-1">
           <Search className="absolute left-2.5 top-1/2 size-3.5 -translate-y-1/2 text-muted-foreground" />
           <Input
@@ -181,7 +189,6 @@ export default function ClipboardViewer() {
         </div>
 
         <div className="flex items-center gap-2">
-          {/* Type filter */}
           <div className="flex items-center gap-1 rounded-lg border border-border bg-muted/50 p-1">
             {TYPE_FILTERS.map(({ value, label }) => (
               <button
@@ -199,7 +206,6 @@ export default function ClipboardViewer() {
             ))}
           </div>
 
-          {/* Refresh */}
           <button
             onClick={handleRefresh}
             className="flex size-8 items-center justify-center rounded-lg border border-border text-muted-foreground transition-colors hover:bg-muted hover:text-foreground"
@@ -229,24 +235,49 @@ export default function ClipboardViewer() {
         </div>
       ) : (
         <div className="space-y-2">
-          {filtered.map((clip) => (
+          {paginated.map((clip) => (
             <ClipCard key={clip.id} clip={clip} onDelete={handleDelete} />
           ))}
         </div>
       )}
 
-      {/* Load more */}
-      {hasMore && !search && typeFilter === 'all' && (
-        <div className="flex justify-center pt-2">
-          <Button
-            variant="outline"
-            size="sm"
-            disabled={loadingMore}
-            onClick={() => fetchClips(keyRef.current, nextSince, true)}
+      {/* Pagination footer */}
+      {filtered.length > 0 && (
+        <div className="flex items-center justify-between border-t border-border pt-4">
+          <button
+            onClick={() => setPage((p) => Math.max(0, p - 1))}
+            disabled={safePage === 0}
+            className="flex items-center gap-1.5 rounded-lg border border-border px-3 py-1.5 text-xs font-medium text-muted-foreground transition-colors hover:bg-muted hover:text-foreground disabled:pointer-events-none disabled:opacity-40"
           >
-            {loadingMore && <Loader2 className="mr-2 size-4 animate-spin" />}
-            {loadingMore ? 'Loading…' : 'Load more'}
-          </Button>
+            <ChevronLeft className="size-3.5" />
+            Previous
+          </button>
+
+          <span className="text-xs text-muted-foreground">
+            Page {safePage + 1} of {pageCount}
+          </span>
+
+          {canLoadMore ? (
+            <Button
+              variant="outline"
+              size="sm"
+              disabled={loadingMore}
+              onClick={() => fetchClips(keyRef.current, nextSince, true)}
+              className="text-xs"
+            >
+              {loadingMore && <Loader2 className="mr-1.5 size-3.5 animate-spin" />}
+              {loadingMore ? 'Loading…' : 'Load more'}
+            </Button>
+          ) : (
+            <button
+              onClick={() => setPage((p) => Math.min(pageCount - 1, p + 1))}
+              disabled={isLastPage}
+              className="flex items-center gap-1.5 rounded-lg border border-border px-3 py-1.5 text-xs font-medium text-muted-foreground transition-colors hover:bg-muted hover:text-foreground disabled:pointer-events-none disabled:opacity-40"
+            >
+              Next
+              <ChevronRight className="size-3.5" />
+            </button>
+          )}
         </div>
       )}
     </div>

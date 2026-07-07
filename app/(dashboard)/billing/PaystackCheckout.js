@@ -244,6 +244,7 @@ export default function PaystackCheckout({ currentPlan, plans, userEmail, fileTr
             return (
               <div
                 key={plan.tier}
+                data-plan={plan.tier}
                 className={`rounded-xl border p-5 transition ${
                   isCurrent
                     ? 'border-primary bg-primary/5 ring-1 ring-primary/30'
@@ -314,10 +315,11 @@ export default function PaystackCheckout({ currentPlan, plans, userEmail, fileTr
         </p>
       </div>
 
-      {/* Add-ons — only shown to paid, non-team users when the backend returns addon info */}
-      {isPaid && activePlan !== 'team' && fileTransferAddonInfo && (
+      {/* File Transfer — shown for all users. Paid users have it included;
+          free users see it as a reason to upgrade. */}
+      {fileTransferAddonInfo && (
         <div>
-          <h2 className="mb-4 text-base font-semibold text-foreground">Add-ons</h2>
+          <h2 className="mb-4 text-base font-semibold text-foreground">Features</h2>
           <div className="rounded-xl border border-border bg-card p-5">
             <div className="flex items-start justify-between gap-4">
               <div className="flex items-start gap-3">
@@ -331,31 +333,28 @@ export default function PaystackCheckout({ currentPlan, plans, userEmail, fileTr
                   <p className="mt-0.5 text-xs text-muted-foreground">
                     {fileTransferAddonInfo.description}
                   </p>
-                  <p className="mt-1.5 text-sm font-semibold text-foreground">
-                    ${(fileTransferAddonInfo.price_usd_cents / 100).toFixed(2)}{' '}
-                    <span className="text-xs font-normal text-muted-foreground">
-                      {fileTransferAddonInfo.type === 'one_time' ? 'one-time' : '/mo'}
-                    </span>
-                  </p>
+                  {!isPaid && (
+                    <p className="mt-1.5 text-xs text-muted-foreground">
+                      Included with any paid plan
+                    </p>
+                  )}
                 </div>
               </div>
 
               <div className="shrink-0">
-                {addonActive ? (
+                {isPaid ? (
                   <span className="inline-flex items-center gap-1.5 rounded-full bg-green-100 px-3 py-1 text-xs font-medium text-green-800 dark:bg-green-900/30 dark:text-green-300">
-                    <Check className="size-3" /> Active
+                    <Check className="size-3" /> Included
                   </span>
                 ) : (
                   <button
-                    onClick={handleAddonPurchase}
-                    disabled={addonLoading || !paystackReady}
-                    className="flex items-center gap-2 rounded-lg bg-primary px-4 py-2 text-sm font-medium text-primary-foreground transition hover:bg-primary/90 disabled:opacity-60"
+                    onClick={() => {
+                      const proCard = document.querySelector('[data-plan="pro"]');
+                      proCard?.scrollIntoView({ behavior: 'smooth', block: 'center' });
+                    }}
+                    className="flex items-center gap-2 rounded-lg border border-border px-4 py-2 text-sm font-medium text-foreground transition hover:bg-muted"
                   >
-                    {addonLoading ? (
-                      <><Loader2 className="size-4 animate-spin" /> Opening payment…</>
-                    ) : (
-                      `Add for $${(fileTransferAddonInfo.price_usd_cents / 100).toFixed(2)}`
-                    )}
+                    Upgrade to unlock
                   </button>
                 )}
               </div>

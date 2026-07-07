@@ -16,6 +16,7 @@ import {
 import { cn } from '@/lib/utils';
 import { Sheet, SheetContent } from '@/components/ui/sheet';
 import { clearKey } from '@/lib/crypto';
+import ThemeToggle from '@/components/ui/theme-toggle';
 
 const NAV_ITEMS = [
   { href: '/dashboard', label: 'Dashboard', icon: LayoutDashboard, exact: true },
@@ -67,8 +68,8 @@ function SidebarBody({ user, onNavigate }) {
         </Link>
       </div>
 
-      {/* Nav links */}
-      <nav className="flex-1 space-y-0.5 p-3">
+      {/* Nav links — overflow-y-auto so long nav scrolls and never pushes footer */}
+      <nav className="flex-1 overflow-y-auto space-y-0.5 p-3">
         {NAV_ITEMS.map(({ href, label, icon, exact }) => {
           const active = exact ? pathname === href : pathname.startsWith(href);
           return (
@@ -84,9 +85,10 @@ function SidebarBody({ user, onNavigate }) {
         })}
       </nav>
 
-      {/* User + logout */}
-      <div className="shrink-0 border-t border-border p-3">
-        <div className="mb-1 truncate px-3 py-1 text-xs text-muted-foreground">{user.email}</div>
+      {/* Footer — always visible regardless of nav overflow */}
+      <div className="shrink-0 border-t border-border p-3 space-y-0.5">
+        <div className="truncate px-3 py-1 text-xs text-muted-foreground">{user.email}</div>
+        <ThemeToggle />
         <button
           onClick={handleLogout}
           className="flex w-full items-center gap-3 rounded-lg px-3 py-2 text-sm font-medium text-muted-foreground transition-colors hover:bg-muted hover:text-foreground"
@@ -111,8 +113,6 @@ export default function Sidebar({ user }) {
 
       {/* Mobile — fixed top bar + Sheet drawer */}
       <header className="fixed inset-x-0 top-0 z-40 flex h-14 items-center gap-3 border-b border-border bg-card px-4 lg:hidden">
-        {/* Plain button — avoids button-in-button hydration error caused by
-            base-ui's SheetTrigger rendering its own <button> around <Button>. */}
         <button
           type="button"
           onClick={() => setOpen(true)}
