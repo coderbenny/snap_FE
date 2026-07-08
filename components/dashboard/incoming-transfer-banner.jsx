@@ -3,7 +3,7 @@
 import { useEffect, useRef, useState } from 'react';
 import { Download, Loader2, X } from 'lucide-react';
 
-import { receiveFile, cancelTransfer } from '@/lib/transfer-client';
+import { receiveFile, cancelTransfer, getBrowserDeviceId, registerBrowserDevice } from '@/lib/transfer-client';
 
 function formatSize(bytes) {
   if (bytes < 1024) return `${bytes} B`;
@@ -18,6 +18,12 @@ export default function IncomingTransferBanner() {
   const [error, setError] = useState(null);
   const esRef = useRef(null);
 
+  // Register this browser as a device once on mount so it appears in the
+  // device picker on other platforms and can be targeted for transfers.
+  useEffect(() => {
+    registerBrowserDevice().catch(() => {/* non-fatal */});
+  }, []);
+
   // ── SSE connection ─────────────────────────────────────────────────────
 
   useEffect(() => {
@@ -31,6 +37,8 @@ export default function IncomingTransferBanner() {
       es.addEventListener('transfer_incoming', (e) => {
         try {
           const data = JSON.parse(e.data);
+          // Only show the banner when this browser is the intended recipient.
+          if (data.target_device_id !== getBrowserDeviceId()) return;
           setIncoming({
             sessionId: data.session_id,
             fileName: data.file_name,

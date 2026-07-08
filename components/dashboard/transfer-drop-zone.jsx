@@ -1,7 +1,7 @@
 'use client';
 
 import { useState, useCallback, useRef } from 'react';
-import { Upload, Loader2, Check, X, Monitor, Laptop, Smartphone } from 'lucide-react';
+import { Upload, Loader2, Check, X, Monitor, Laptop, Smartphone, Globe } from 'lucide-react';
 
 import {
   listOtherDevices,
@@ -25,6 +25,9 @@ function DeviceIcon({ platform }) {
   }
   if (platform === 'ios' || platform === 'android') {
     return <Smartphone className="size-4 shrink-0 text-muted-foreground" />;
+  }
+  if (platform === 'web') {
+    return <Globe className="size-4 shrink-0 text-muted-foreground" />;
   }
   return <Monitor className="size-4 shrink-0 text-muted-foreground" />;
 }

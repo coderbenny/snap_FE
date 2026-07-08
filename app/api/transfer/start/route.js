@@ -14,8 +14,15 @@ export async function POST(req) {
   let body = {};
   try { body = await req.json(); } catch { /* empty body */ }
 
+  const deviceId = req.headers.get('X-Device-ID') || '';
+
   try {
-    const res = await authedApi(session.accessToken).post('/transfer/start', body);
+    const res = await authedApi(session.accessToken).post('/transfer/start', body, {
+      headers: {
+        Authorization: `Bearer ${session.accessToken}`,
+        'X-Device-ID': deviceId,
+      },
+    });
     return NextResponse.json(res.data);
   } catch (err) {
     const status = err.response?.status || 500;
