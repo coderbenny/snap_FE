@@ -22,6 +22,7 @@ const TIERS = [
     features: [
       'Everything in Free',
       'Cross-device sync',
+      'File transfer between devices',
       'Unlimited history',
       'Up to 5 devices',
       'Priority support',

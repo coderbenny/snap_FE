@@ -50,6 +50,7 @@ const FEATURES = [
   { label: 'History retention', free: '30 days', pro: 'Unlimited', proAi: 'Unlimited', team: 'Unlimited' },
   { label: 'Devices', free: '1', pro: '5', proAi: '5', team: 'Unlimited' },
   { label: 'Cross-device sync', free: false, pro: true, proAi: true, team: true },
+  { label: 'File transfer (any device)', free: false, pro: true, proAi: true, team: true },
   { label: 'End-to-end encryption', free: true, pro: true, proAi: true, team: true },
   { label: 'Instant search', free: true, pro: true, proAi: true, team: true },
   { label: 'Smart tagging', free: false, pro: true, proAi: true, team: true },
