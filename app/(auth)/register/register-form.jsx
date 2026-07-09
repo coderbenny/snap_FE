@@ -1,21 +1,21 @@
 'use client';
 
 import { useState } from 'react';
-import { useRouter } from 'next/navigation';
 import Link from 'next/link';
-import { Clipboard, Eye, EyeOff, Loader2 } from 'lucide-react';
+import { Clipboard, Eye, EyeOff, Loader2, Mail, CheckCircle2 } from 'lucide-react';
 import { Button } from '@/components/ui/button';
 import { Input } from '@/components/ui/input';
 import { Label } from '@/components/ui/label';
-import { deriveKey, storeKey } from '@/lib/crypto';
 
 export default function RegisterForm() {
-  const router = useRouter();
   const [email, setEmail] = useState('');
   const [password, setPassword] = useState('');
   const [error, setError] = useState('');
   const [loading, setLoading] = useState(false);
   const [showPassword, setShowPassword] = useState(false);
+  const [registeredEmail, setRegisteredEmail] = useState('');
+  const [resendLoading, setResendLoading] = useState(false);
+  const [resendSent, setResendSent] = useState(false);
 
   async function handleSubmit(e) {
     e.preventDefault();
@@ -36,18 +36,79 @@ export default function RegisterForm() {
         return;
       }
 
-      // Derive AES-256-GCM key immediately — user won't need to re-enter password
-      if (data.userId) {
-        const key = await deriveKey(password, data.userId);
-        await storeKey(key);
-      }
-
-      router.push('/dashboard');
+      setRegisteredEmail(email);
     } catch {
       setError('Something went wrong. Please try again.');
     } finally {
       setLoading(false);
     }
+  }
+
+  async function handleResend() {
+    if (!registeredEmail) return;
+    setResendLoading(true);
+    setResendSent(false);
+    try {
+      await fetch('/api/auth/resend-verification', {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({ email: registeredEmail }),
+      });
+      setResendSent(true);
+    } catch {
+      // non-critical — silently ignore
+    } finally {
+      setResendLoading(false);
+    }
+  }
+
+  if (registeredEmail) {
+    return (
+      <div className="w-full max-w-sm">
+        <div className="mb-8 flex flex-col items-center gap-3">
+          <div className="flex size-12 items-center justify-center rounded-xl bg-primary/10">
+            <Mail className="size-6 text-primary" />
+          </div>
+          <div className="text-center">
+            <h1 className="text-2xl font-bold tracking-tight text-foreground">Check your inbox</h1>
+            <p className="mt-1 text-sm text-muted-foreground">
+              We sent a verification link to
+            </p>
+            <p className="mt-0.5 text-sm font-medium text-foreground">{registeredEmail}</p>
+          </div>
+        </div>
+
+        <div className="space-y-3">
+          <p className="text-center text-xs text-muted-foreground">
+            Click the link to activate your account, then sign in. Don&apos;t see it? Check your spam folder.
+          </p>
+
+          {resendSent ? (
+            <div className="flex items-center justify-center gap-2 text-sm text-primary">
+              <CheckCircle2 className="size-4" />
+              Verification email sent
+            </div>
+          ) : (
+            <Button
+              variant="outline"
+              className="w-full"
+              onClick={handleResend}
+              disabled={resendLoading}
+            >
+              {resendLoading && <Loader2 className="mr-2 size-4 animate-spin" />}
+              Resend verification email
+            </Button>
+          )}
+
+          <Link
+            href="/login"
+            className="block text-center text-sm font-medium text-foreground underline-offset-4 hover:underline"
+          >
+            Go to sign in
+          </Link>
+        </div>
+      </div>
+    );
   }
 
   return (
