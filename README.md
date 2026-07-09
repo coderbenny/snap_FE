@@ -98,7 +98,7 @@ node -e "console.log(require('crypto').randomBytes(32).toString('hex'))"
 
 Snapit uses **zero-knowledge encryption**: clipboard content is encrypted on the originating device before it ever leaves it, and the backend stores only ciphertext. The web dashboard replicates the same scheme used by the desktop and mobile clients:
 
-1. The user's passphrase is fed into **PBKDF2-SHA256** (600 000 iterations) with a per-user salt to derive a 256-bit key — this derivation happens entirely in the browser via the Web Crypto API.
+1. The user's passphrase is fed into **PBKDF2-SHA256** (200 000 iterations) with a per-user salt to derive a 256-bit key — this derivation happens entirely in the browser via the Web Crypto API.
 2. Each clipboard entry is decrypted with **AES-256-GCM** using that derived key and the per-entry IV stored alongside the ciphertext.
 3. The derived key and all plaintext live only in memory for the duration of the session and are never sent to the server.
 
