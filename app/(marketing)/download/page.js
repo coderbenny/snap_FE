@@ -1,95 +1,69 @@
-import { Apple, Monitor, Smartphone } from 'lucide-react';
-import { Button } from '@/components/ui/button';
-import { Badge } from '@/components/ui/badge';
+import { Github, ExternalLink } from 'lucide-react';
+import InstallGuide from '@/components/marketing/install-guide';
+import { REPOS } from '@/lib/downloads';
 
 export const metadata = {
-  title: 'Download Snapit',
-  description: 'Download Snapit for macOS, Windows, or Android. Free forever on a single device.',
+  title: 'Download Snapit — macOS, Windows & Android',
+  description:
+    'Install Snapit on macOS, Windows, or Android. Free forever on a single device — no account required. Open source, published on GitHub.',
+  alternates: { canonical: '/download' },
 };
-
-// Set NEXT_PUBLIC_CDN_URL in Vercel to your Cloudflare R2 public bucket URL,
-// e.g. https://cdn.snapit.ink  (no trailing slash).
-const CDN = process.env.NEXT_PUBLIC_CDN_URL || 'https://cdn.snapit.ink';
-
-const PLATFORMS = [
-  {
-    name: 'macOS',
-    icon: Apple,
-    description: 'macOS 13 Ventura or later. Apple Silicon + Intel.',
-    badge: 'Universal',
-    file: 'snapit-macos-universal.dmg',
-    size: '~24 MB',
-    href: `${CDN}/Snapit-1.0.0.dmg`,
-  },
-  {
-    name: 'Windows',
-    icon: Monitor,
-    description: 'Windows 10 (64-bit) or later.',
-    badge: 'x64',
-    file: 'snapit-windows-setup.exe',
-    size: '~31 MB',
-    href: `${CDN}/Snapit-1.0.0.exe`,
-  },
-  {
-    name: 'Android',
-    icon: Smartphone,
-    description: 'Android 10 or later. ARMv8 + x86-64.',
-    badge: 'Beta',
-    file: 'snapit-android.apk',
-    size: '~18 MB',
-    href: `${CDN}/snapit-android.apk`,
-  },
-];
 
 export default function DownloadPage() {
   return (
     <main className="py-20 sm:py-28">
       <div className="mx-auto max-w-4xl px-4 sm:px-6">
+        {/* Heading */}
         <div className="text-center">
           <h1 className="text-4xl font-bold tracking-tight text-foreground sm:text-5xl">
-            Download Snapit
+            Install Snapit
           </h1>
-          <p className="mt-4 text-lg text-muted-foreground">
-            Free forever on a single device. No account required to get started.
+          <p className="mx-auto mt-4 max-w-xl text-lg text-muted-foreground">
+            Free forever on a single device — no account required. Pick your platform below. On
+            macOS we recommend Homebrew so you skip the Gatekeeper warning.
           </p>
         </div>
 
-        <div className="mt-16 grid grid-cols-1 gap-6 sm:grid-cols-3">
-          {PLATFORMS.map(({ name, icon: Icon, description, badge, file, size, href }) => (
-            <div key={name} className="flex flex-col rounded-xl border border-border bg-card p-6">
-              <div className="mb-4 flex items-center justify-between">
-                <div className="flex size-10 items-center justify-center rounded-lg bg-muted">
-                  <Icon className="size-5 text-foreground" />
-                </div>
-                <Badge variant="secondary">{badge}</Badge>
-              </div>
-
-              <h2 className="font-semibold text-foreground">{name}</h2>
-              <p className="mt-2 flex-1 text-sm text-muted-foreground">{description}</p>
-
-              <Button className="mt-6 w-full" asChild>
-                <a href={href} download>
-                  Download for {name}
-                </a>
-              </Button>
-
-              <div className="mt-4 space-y-1">
-                <p className="text-xs text-muted-foreground">
-                  <span className="font-medium">File:</span> {file}
-                </p>
-                <p className="text-xs text-muted-foreground">
-                  <span className="font-medium">Size:</span> {size}
-                </p>
-              </div>
-            </div>
-          ))}
+        {/* Install guide (tabs per platform) */}
+        <div className="mt-14">
+          <InstallGuide />
         </div>
 
-        <div className="mt-12 rounded-xl border border-border bg-muted/50 p-6 text-center text-sm text-muted-foreground">
-          <p>
-            All releases are distributed via Cloudflare&apos;s global CDN for fast, reliable
-            downloads from anywhere in the world.
+        {/* Open-source note */}
+        <div className="mt-16 rounded-xl border border-border bg-muted/50 p-6 text-center">
+          <p className="text-sm text-muted-foreground">
+            Snapit is open source. Every release is published on GitHub — inspect the code, verify
+            the build, or contribute.
           </p>
+          <div className="mt-4 flex flex-wrap items-center justify-center gap-x-6 gap-y-2 text-sm">
+            <a
+              href={REPOS.desktop}
+              target="_blank"
+              rel="noopener noreferrer"
+              className="inline-flex items-center gap-1.5 font-medium text-muted-foreground transition-colors hover:text-foreground"
+            >
+              <Github className="size-4" /> Desktop (macOS &amp; Windows)
+              <ExternalLink className="size-3" />
+            </a>
+            <a
+              href={REPOS.mobile}
+              target="_blank"
+              rel="noopener noreferrer"
+              className="inline-flex items-center gap-1.5 font-medium text-muted-foreground transition-colors hover:text-foreground"
+            >
+              <Github className="size-4" /> Android
+              <ExternalLink className="size-3" />
+            </a>
+            <a
+              href={REPOS.backend}
+              target="_blank"
+              rel="noopener noreferrer"
+              className="inline-flex items-center gap-1.5 font-medium text-muted-foreground transition-colors hover:text-foreground"
+            >
+              <Github className="size-4" /> Backend
+              <ExternalLink className="size-3" />
+            </a>
+          </div>
         </div>
       </div>
     </main>
