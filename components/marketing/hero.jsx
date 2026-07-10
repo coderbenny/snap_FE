@@ -57,19 +57,19 @@ export default function Hero() {
             {/* Mock clipboard list */}
             <div className="space-y-px p-2">
               {[
-                { type: 'text', preview: 'npm install snap-client --save', time: 'just now' },
-                { type: 'url', preview: 'https://github.com/snap/snap-server', time: '2m ago' },
+                { type: 'text', preview: 'brew install --cask snapit', time: 'just now' },
+                { type: 'url', preview: 'https://snapit.ink/download', time: '2m ago' },
                 {
                   type: 'text',
-                  preview: 'Bearer eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXV...',
+                  preview: 'xattr -dr com.apple.quarantine /Applications/Snapit.app',
                   time: '5m ago',
                 },
                 {
-                  type: 'text',
-                  preview: 'SELECT * FROM clipboard_items WHERE user_id = ?',
+                  type: 'url',
+                  preview: 'https://github.com/coderbenny/snap_PC',
                   time: '12m ago',
                 },
-                { type: 'url', preview: 'https://tabmemory.smartminds.life', time: '1h ago' },
+                { type: 'text', preview: 'brew tap coderbenny/tap', time: '1h ago' },
               ].map((item, i) => (
                 <div
                   key={i}
