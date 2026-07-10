@@ -1,6 +1,7 @@
 import Link from 'next/link';
-import { Clipboard } from 'lucide-react';
+import { Clipboard, Github } from 'lucide-react';
 import { Separator } from '@/components/ui/separator';
+import { GITHUB_URL } from '@/lib/downloads';
 
 const LINKS = {
   Product: [
@@ -33,6 +34,15 @@ export default function Footer() {
             <p className="mt-3 text-sm text-muted-foreground">
               Universal clipboard vault. Copy once, paste anywhere.
             </p>
+            <a
+              href={GITHUB_URL}
+              target="_blank"
+              rel="noopener noreferrer"
+              className="mt-4 inline-flex items-center gap-2 rounded-md border border-border px-3 py-1.5 text-sm text-muted-foreground transition-colors hover:bg-muted hover:text-foreground"
+            >
+              <Github className="size-4" />
+              Open source on GitHub
+            </a>
           </div>
 
           {/* Links */}

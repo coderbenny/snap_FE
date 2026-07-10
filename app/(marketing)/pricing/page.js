@@ -4,6 +4,7 @@ export const metadata = {
   title: 'Pricing',
   description:
     'Snapit is free on a single device. Upgrade to Pro for cross-device sync, or Team for a shared snippet library.',
+  alternates: { canonical: '/pricing' },
 };
 
 export default function PricingPage() {
