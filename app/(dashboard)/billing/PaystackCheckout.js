@@ -1,7 +1,7 @@
 'use client';
 
 import { useState, useEffect } from 'react';
-import { Check, CreditCard, ExternalLink, Loader2, Share2, Sparkles } from 'lucide-react';
+import { Check, CreditCard, ExternalLink, Loader2, Share2, Sparkles, Tag, X } from 'lucide-react';
 
 const PAYSTACK_PUBLIC_KEY = process.env.NEXT_PUBLIC_PAYSTACK_PUBLIC_KEY;
 
@@ -24,6 +24,12 @@ export default function PaystackCheckout({ currentPlan, plans, userEmail, fileTr
   const [addonActive, setAddonActive] = useState(fileTransferAddon);
   const [error, setError] = useState(null);
 
+  const [couponOpen, setCouponOpen] = useState(false);
+  const [couponInput, setCouponInput] = useState('');
+  const [couponLoading, setCouponLoading] = useState(false);
+  const [couponResult, setCouponResult] = useState(null);  // validated coupon data
+  const [couponError, setCouponError] = useState(null);
+
   const activePlan = newPlan ?? currentPlan;
 
   // Load Paystack InlineJS v2 once on mount.
@@ -42,9 +48,44 @@ export default function PaystackCheckout({ currentPlan, plans, userEmail, fileTr
     document.head.appendChild(script);
   }, []);
 
+  async function handleValidateCoupon(tier) {
+    const code = couponInput.trim().toUpperCase();
+    if (!code) return;
+    setCouponLoading(true);
+    setCouponError(null);
+    setCouponResult(null);
+    try {
+      const res = await fetch('/api/billing/validate-coupon', {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({ code, tier }),
+      });
+      const data = await res.json();
+      if (!res.ok) throw new Error(data.error || 'Invalid coupon code');
+      setCouponResult(data);
+    } catch (e) {
+      setCouponError(e.message);
+    } finally {
+      setCouponLoading(false);
+    }
+  }
+
+  function clearCoupon() {
+    setCouponInput('');
+    setCouponResult(null);
+    setCouponError(null);
+    setCouponOpen(false);
+  }
+
   async function handleUpgrade(tier) {
     setLoading(tier);
     setError(null);
+
+    // Re-validate coupon applies to this tier before submitting
+    const appliedCoupon =
+      couponResult?.valid && (!couponResult.tier_restriction || couponResult.code)
+        ? couponResult.code
+        : null;
 
     let authorizationUrl = null;
 
@@ -53,7 +94,7 @@ export default function PaystackCheckout({ currentPlan, plans, userEmail, fileTr
       const initRes = await fetch('/api/billing/subscribe', {
         method: 'POST',
         headers: { 'Content-Type': 'application/json' },
-        body: JSON.stringify({ tier }),
+        body: JSON.stringify({ tier, coupon_code: appliedCoupon }),
       });
 
       if (!initRes.ok) {
@@ -233,7 +274,63 @@ export default function PaystackCheckout({ currentPlan, plans, userEmail, fileTr
 
       {/* Plan cards */}
       <div>
-        <h2 className="mb-4 text-base font-semibold text-foreground">Plans</h2>
+        <div className="mb-4 flex items-center justify-between">
+          <h2 className="text-base font-semibold text-foreground">Plans</h2>
+          {!couponResult ? (
+            <button
+              onClick={() => setCouponOpen((o) => !o)}
+              className="flex items-center gap-1.5 text-xs text-muted-foreground transition-colors hover:text-foreground"
+            >
+              <Tag className="size-3.5" />
+              Have a coupon code?
+            </button>
+          ) : (
+            <div className="flex items-center gap-2">
+              <span className="flex items-center gap-1.5 rounded-full bg-green-100 px-2.5 py-0.5 text-xs font-medium text-green-800 dark:bg-green-900/30 dark:text-green-300">
+                <Tag className="size-3" />
+                {couponResult.code} applied
+              </span>
+              <button onClick={clearCoupon} className="text-muted-foreground hover:text-foreground">
+                <X className="size-3.5" />
+              </button>
+            </div>
+          )}
+        </div>
+
+        {/* Coupon input panel */}
+        {couponOpen && !couponResult && (
+          <div className="mb-4 rounded-xl border border-border bg-muted/40 p-4">
+            <p className="mb-3 text-xs text-muted-foreground">
+              Enter your coupon code. The discount applies to the first month&apos;s charge.
+            </p>
+            <div className="flex gap-2">
+              <input
+                type="text"
+                value={couponInput}
+                onChange={(e) => {
+                  setCouponInput(e.target.value.toUpperCase());
+                  setCouponError(null);
+                }}
+                onKeyDown={(e) => {
+                  if (e.key === 'Enter') handleValidateCoupon(plans[0]?.tier ?? 'pro');
+                }}
+                placeholder="e.g. LAUNCH20"
+                className="flex-1 rounded-lg border border-border bg-background px-3 py-2 text-sm text-foreground placeholder:text-muted-foreground focus:outline-none focus:ring-1 focus:ring-primary"
+              />
+              <button
+                onClick={() => handleValidateCoupon(plans[0]?.tier ?? 'pro')}
+                disabled={couponLoading || !couponInput.trim()}
+                className="flex items-center gap-1.5 rounded-lg bg-primary px-4 py-2 text-sm font-medium text-primary-foreground transition hover:bg-primary/90 disabled:opacity-50"
+              >
+                {couponLoading ? <Loader2 className="size-4 animate-spin" /> : 'Apply'}
+              </button>
+            </div>
+            {couponError && (
+              <p className="mt-2 text-xs text-destructive">{couponError}</p>
+            )}
+          </div>
+        )}
+
         <div className="grid grid-cols-1 gap-4 sm:grid-cols-3">
           {plans.map((plan) => {
             const isCurrent = activePlan === plan.tier;
@@ -265,10 +362,22 @@ export default function PaystackCheckout({ currentPlan, plans, userEmail, fileTr
                 )}
 
                 <p className="text-base font-semibold text-foreground">{plan.name}</p>
-                <p className="mt-1 text-2xl font-bold text-foreground">
-                  ${(plan.price_usd_cents / 100).toFixed(0)}
-                  <span className="text-sm font-normal text-muted-foreground">/mo</span>
-                </p>
+                {couponResult?.valid && couponResult.discounted_price_cents < plan.price_usd_cents ? (
+                  <div className="mt-1">
+                    <span className="text-sm text-muted-foreground line-through">
+                      ${(plan.price_usd_cents / 100).toFixed(0)}
+                    </span>
+                    <span className="ml-2 text-2xl font-bold text-green-600 dark:text-green-400">
+                      ${(couponResult.discounted_price_cents / 100).toFixed(0)}
+                    </span>
+                    <span className="text-sm font-normal text-muted-foreground">/first month</span>
+                  </div>
+                ) : (
+                  <p className="mt-1 text-2xl font-bold text-foreground">
+                    ${(plan.price_usd_cents / 100).toFixed(0)}
+                    <span className="text-sm font-normal text-muted-foreground">/mo</span>
+                  </p>
+                )}
 
                 <ul className="mt-4 space-y-2">
                   {plan.features.map((f) => (
