@@ -6,7 +6,7 @@ import TransferDropZone from '@/components/dashboard/transfer-drop-zone';
 
 export default async function DashboardLayout({ children }) {
   const session = await getIronSession(cookies(), sessionOptions);
-  const user = { email: session.userEmail || '' };
+  const user = { email: session.userEmail || '', isAdmin: session.isAdmin || false };
 
   return (
     <div className="flex h-screen overflow-hidden bg-background">

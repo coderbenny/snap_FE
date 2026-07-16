@@ -24,6 +24,27 @@ export default async function AdminLayout({ children }) {
           <span style={{ fontWeight: 700, fontSize: 15, color: '#fff', letterSpacing: '0.5px' }}>
             Snapit Admin
           </span>
+          <Link
+            href="/dashboard"
+            style={{
+              display: 'flex',
+              alignItems: 'center',
+              gap: 6,
+              marginTop: 10,
+              padding: '6px 10px',
+              borderRadius: 6,
+              border: '1px solid #2a2d3a',
+              color: '#a0a8c0',
+              fontSize: 12,
+              fontWeight: 500,
+              textDecoration: 'none',
+              transition: 'background 0.15s, color 0.15s',
+            }}
+            onMouseEnter={e => { e.currentTarget.style.background = '#22253a'; e.currentTarget.style.color = '#fff'; }}
+            onMouseLeave={e => { e.currentTarget.style.background = 'transparent'; e.currentTarget.style.color = '#a0a8c0'; }}
+          >
+            ← Back to dashboard
+          </Link>
         </div>
         <ul style={{ listStyle: 'none', margin: 0, padding: '12px 0' }}>
           {[
@@ -52,14 +73,6 @@ export default async function AdminLayout({ children }) {
             </li>
           ))}
         </ul>
-        <div style={{ padding: '12px 20px', borderTop: '1px solid #2a2d3a', marginTop: 'auto' }}>
-          <Link
-            href="/dashboard"
-            style={{ color: '#6b7280', fontSize: 13, textDecoration: 'none' }}
-          >
-            ← Back to app
-          </Link>
-        </div>
       </nav>
 
       <main style={{ flex: 1, padding: '32px', overflowY: 'auto', color: '#e0e4f0' }}>

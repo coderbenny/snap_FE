@@ -12,6 +12,7 @@ import {
   CreditCard,
   LogOut,
   Menu,
+  ShieldCheck,
 } from 'lucide-react';
 import { cn } from '@/lib/utils';
 import { Sheet, SheetContent } from '@/components/ui/sheet';
@@ -40,6 +41,19 @@ function NavLink({ href, label, icon: Icon, active, onClick }) {
     >
       <Icon className="size-4 shrink-0" />
       {label}
+    </Link>
+  );
+}
+
+function AdminNavLink({ onClick }) {
+  return (
+    <Link
+      href="/admin"
+      onClick={onClick}
+      className="flex items-center gap-3 rounded-lg px-3 py-2 text-sm font-medium text-amber-600 transition-colors hover:bg-amber-50 hover:text-amber-700 dark:text-amber-400 dark:hover:bg-amber-950/40 dark:hover:text-amber-300"
+    >
+      <ShieldCheck className="size-4 shrink-0" />
+      Admin Panel
     </Link>
   );
 }
@@ -87,6 +101,9 @@ function SidebarBody({ user, onNavigate }) {
 
       {/* Footer — always visible regardless of nav overflow */}
       <div className="shrink-0 border-t border-border p-3 space-y-0.5">
+        {user.isAdmin && (
+          <AdminNavLink onClick={onNavigate} />
+        )}
         <div className="truncate px-3 py-1 text-xs text-muted-foreground">{user.email}</div>
         <ThemeToggle />
         <button
