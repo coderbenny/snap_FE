@@ -24,25 +24,7 @@ export default async function AdminLayout({ children }) {
           <span style={{ fontWeight: 700, fontSize: 15, color: '#fff', letterSpacing: '0.5px' }}>
             Snapit Admin
           </span>
-          <Link
-            href="/dashboard"
-            style={{
-              display: 'flex',
-              alignItems: 'center',
-              gap: 6,
-              marginTop: 10,
-              padding: '6px 10px',
-              borderRadius: 6,
-              border: '1px solid #2a2d3a',
-              color: '#a0a8c0',
-              fontSize: 12,
-              fontWeight: 500,
-              textDecoration: 'none',
-              transition: 'background 0.15s, color 0.15s',
-            }}
-            onMouseEnter={e => { e.currentTarget.style.background = '#22253a'; e.currentTarget.style.color = '#fff'; }}
-            onMouseLeave={e => { e.currentTarget.style.background = 'transparent'; e.currentTarget.style.color = '#a0a8c0'; }}
-          >
+          <Link href="/dashboard" className="admin-back-link">
             ← Back to dashboard
           </Link>
         </div>
@@ -81,6 +63,14 @@ export default async function AdminLayout({ children }) {
 
       <style>{`
         nav a:hover { color: #fff !important; }
+        .admin-back-link {
+          display: flex; align-items: center; gap: 6px;
+          margin-top: 10px; padding: 6px 10px; border-radius: 6px;
+          border: 1px solid #2a2d3a; color: #a0a8c0;
+          font-size: 12px; font-weight: 500; text-decoration: none;
+          transition: background 0.15s, color 0.15s;
+        }
+        .admin-back-link:hover { background: #22253a; color: #fff !important; }
         * { box-sizing: border-box; }
         body { margin: 0; font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', sans-serif; }
         .admin-card {
