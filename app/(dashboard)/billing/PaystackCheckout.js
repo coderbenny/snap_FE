@@ -21,6 +21,7 @@ export default function PaystackCheckout({ currentPlan, plans, userEmail, fileTr
   const [addonLoading, setAddonLoading] = useState(false);
   const [portalLoading, setPortalLoading] = useState(false);
   const [newPlan, setNewPlan] = useState(null);   // optimistic tier after payment
+  const [trialMessage, setTrialMessage] = useState(null); // set for free-coupon activations
   const [addonActive, setAddonActive] = useState(fileTransferAddon);
   const [error, setError] = useState(null);
 
@@ -102,8 +103,22 @@ export default function PaystackCheckout({ currentPlan, plans, userEmail, fileTr
         throw new Error(body.error || 'Could not initialize payment. Please try again.');
       }
 
-      // Backend returns { authorization_url, access_code, reference }
-      const { authorization_url, access_code } = await initRes.json();
+      // Backend returns either:
+      //   { authorization_url, access_code, reference }  — normal Paystack flow
+      //   { free: true, tier }                           — 100% coupon, activated directly
+      const payload = await initRes.json();
+
+      if (payload.free) {
+        setNewPlan(payload.tier ?? tier);
+        setTrialMessage(
+          `Your free month on the ${(payload.tier ?? tier).replace('_', ' ')} plan is active. ` +
+          `It expires in 30 days — you'll be prompted to add a payment method to continue.`
+        );
+        setLoading(null);
+        return;
+      }
+
+      const { authorization_url, access_code } = payload;
       authorizationUrl = authorization_url;
 
       // Step 2 — open the Paystack inline popup.
@@ -219,13 +234,21 @@ export default function PaystackCheckout({ currentPlan, plans, userEmail, fileTr
     <div className="space-y-8">
 
       {/* Success banner */}
-      {newPlan && (
+      {newPlan && !trialMessage && (
         <div className="flex items-center gap-3 rounded-xl border border-green-200 bg-green-50 p-4 text-green-800 dark:border-green-800 dark:bg-green-950/40 dark:text-green-300">
           <Check className="size-5 shrink-0" />
           <p className="text-sm font-medium">
             You&apos;re now on the{' '}
             <span className="capitalize">{newPlan.replace('_', ' ')}</span> plan. Welcome aboard!
           </p>
+        </div>
+      )}
+
+      {/* Free-trial banner (100% coupon) */}
+      {trialMessage && (
+        <div className="flex items-start gap-3 rounded-xl border border-blue-200 bg-blue-50 p-4 text-blue-800 dark:border-blue-800 dark:bg-blue-950/40 dark:text-blue-300">
+          <Check className="mt-0.5 size-5 shrink-0" />
+          <p className="text-sm font-medium">{trialMessage}</p>
         </div>
       )}
 
@@ -365,12 +388,25 @@ export default function PaystackCheckout({ currentPlan, plans, userEmail, fileTr
                 {couponResult?.valid && couponResult.discounted_price_cents < plan.price_usd_cents ? (
                   <div className="mt-1">
                     <span className="text-sm text-muted-foreground line-through">
-                      ${(plan.price_usd_cents / 100).toFixed(0)}
+                      ${(plan.price_usd_cents / 100).toFixed(0)}/mo
                     </span>
-                    <span className="ml-2 text-2xl font-bold text-green-600 dark:text-green-400">
-                      ${(couponResult.discounted_price_cents / 100).toFixed(0)}
-                    </span>
-                    <span className="text-sm font-normal text-muted-foreground">/first month</span>
+                    {couponResult.discounted_price_cents === 0 ? (
+                      <div>
+                        <span className="text-2xl font-bold text-green-600 dark:text-green-400">
+                          Free
+                        </span>
+                        <span className="ml-1.5 text-sm font-normal text-muted-foreground">
+                          for 1 month
+                        </span>
+                      </div>
+                    ) : (
+                      <div>
+                        <span className="text-2xl font-bold text-green-600 dark:text-green-400">
+                          ${(couponResult.discounted_price_cents / 100).toFixed(0)}
+                        </span>
+                        <span className="text-sm font-normal text-muted-foreground">/first month</span>
+                      </div>
+                    )}
                   </div>
                 ) : (
                   <p className="mt-1 text-2xl font-bold text-foreground">
